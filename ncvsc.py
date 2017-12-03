@@ -16,8 +16,7 @@ def main(K, N, L, seed, learning_rule):
             offset = len(seed)//2
             a.load_from_string(seed[:offset])
             b.load_from_string(seed[offset:])
-        except Exception as e:
-            raise e
+        except Exception:
             print("Bad seed")
             return
     else:
