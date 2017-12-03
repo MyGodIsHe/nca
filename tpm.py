@@ -1,6 +1,6 @@
 from hashlib import md5
 from array import array
-from random import randint
+from random import randint, choice
 
 
 def default_hash_method(weights):
@@ -8,11 +8,23 @@ def default_hash_method(weights):
 
 
 def sgn(x):
-    return 1 if x > 0 else -1
+    if x > 0:
+        return 1
+    if x < 0:
+        return -1
+    return 0
 
 
-def cmp(a, b):
-    return 1 if a == b else -1
+def theta(a, b):
+    return 0 if a != b else 1
+
+
+def distance(a, b):
+    cnt = 0
+    ln = len(a.weights)
+    for i in range(ln):
+        cnt += abs(a.weights[i] - b.weights[i])
+    return cnt
 
 
 class TPM(object):
@@ -28,7 +40,7 @@ class TPM(object):
         self.L = L
         self.hash_method = hash_method
 
-        self.weights = array('f', range(K*N))
+        self.weights = array('i', range(K*N))
 
     def g(self, x):
         if x > self.L:
@@ -43,7 +55,7 @@ class TPM(object):
 
     def rnd_input_vector(self):
         return [
-            1 if randint(0, 1) == 0 else -1
+            choice([-1, 0, 1])
             for i in range(len(self.weights))
         ]
 
@@ -63,4 +75,6 @@ class TPM(object):
             sigma = sigma_list[i]
             for j in range(self.N):
                 ij = i * self.N + j
-                self.weights[ij] = self.g(self.weights[ij] - input[ij] * cmp(self_out, sigma) * cmp(sigma, him_out))
+                self.weights[ij] = self.g(self.weights[ij] + sigma * input[ij] * theta(self_out, sigma) * theta(self_out, him_out))
+                #self.weights[ij] = self.g(self.weights[ij] - sigma * input[ij] * theta(self_out, sigma) * theta(self_out, him_out))
+                #self.weights[ij] = self.g(self.weights[ij] - input[ij] * theta(self_out, sigma) * theta(self_out, him_out))

@@ -2,8 +2,9 @@
 
 from functools import reduce
 from operator import mul
+import sys
 
-from tpm import TPM
+from tpm import TPM, distance
 
 
 if __name__ == '__main__':
@@ -15,6 +16,7 @@ if __name__ == '__main__':
     b = TPM(K=K, N=N, L=L)
     b.randomize_weights()
 
+    print("start distance: ", distance(a, b))
     i = 1
 
     while a.hash_of_weights() != b.hash_of_weights():
@@ -26,11 +28,10 @@ if __name__ == '__main__':
         b_sigma = list(b.propagate(b_input))
         b_out = reduce(mul, b_sigma)
 
-        print("%010.i" % i, end='')
         if a_out == b_out:
             a.back_propagate(a_input, a_out, b_out, a_sigma)
             b.back_propagate(b_input, b_out, a_out, b_sigma)
-            print('>')
-        else:
-            print()
+
+        sys.stdout.write("\rcycles: %010.i; distance: %010.i;" % (i, distance(a, b)))
+        sys.stdout.flush()
         i += 1
