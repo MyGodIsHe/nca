@@ -16,7 +16,7 @@ def sgn(x):
 
 
 def theta(a, b):
-    return 0 if a != b else 1
+    return -1 if a != b else 1
 
 
 def distance(a, b):
@@ -29,7 +29,7 @@ def distance(a, b):
 
 class TPM(object):
 
-    def __init__(self, K, N, L, hash_method=default_hash_method):
+    def __init__(self, K, N, L, hash_method=default_hash_method, learning_rule=''):
         assert isinstance(K, int) and K > 0
         assert isinstance(N, int) and N > 0
         assert isinstance(L, int) and L > 0
@@ -39,8 +39,24 @@ class TPM(object):
         self.N = N
         self.L = L
         self.hash_method = hash_method
+        self.learning_rule = {
+            'hebbian': self.learning_rule_hebbian,
+            'anti_hebbian': self.learning_rule_anti_hebbian,
+            'random_walk': self.learning_rule_random_walk,
+            'custom': self.learning_rule_custom,
+        }.get(learning_rule, self.learning_rule_hebbian)
 
         self.weights = array('i', range(K*N))
+
+    def __repr__(self):
+        return ''.join('{:02x}'.format(x) for x in self.weights.tobytes())
+
+    def load_from_string(self, hex):
+        bytes = []
+        for i in range(0, len(hex)//2, 2):
+            bytes.append(int(hex[i:i + 2], 16))
+        for i in range(len(self.weights)):
+            self.weights[i] = bytes[i]
 
     def g(self, x):
         if x > self.L:
@@ -75,6 +91,18 @@ class TPM(object):
             sigma = sigma_list[i]
             for j in range(self.N):
                 ij = i * self.N + j
-                self.weights[ij] = self.g(self.weights[ij] + sigma * input[ij] * theta(self_out, sigma) * theta(self_out, him_out))
-                #self.weights[ij] = self.g(self.weights[ij] - sigma * input[ij] * theta(self_out, sigma) * theta(self_out, him_out))
-                #self.weights[ij] = self.g(self.weights[ij] - input[ij] * theta(self_out, sigma) * theta(self_out, him_out))
+                self.learning_rule(ij, sigma, input, self_out, him_out)
+
+    def learning_rule_hebbian(self, ij, sigma, input, self_out, him_out):
+        self.weights[ij] = self.g(
+            self.weights[ij] + sigma * input[ij] * theta(self_out, sigma) * theta(self_out, him_out))
+
+    def learning_rule_anti_hebbian(self, ij, sigma, input, self_out, him_out):
+        self.weights[ij] = self.g(
+            self.weights[ij] - sigma * input[ij] * theta(self_out, sigma) * theta(self_out, him_out))
+
+    def learning_rule_random_walk(self, ij, sigma, input, self_out, him_out):
+        self.weights[ij] = self.g(self.weights[ij] + input[ij] * theta(self_out, sigma) * theta(self_out, him_out))
+
+    def learning_rule_custom(self, ij, sigma, input, self_out, him_out):
+        self.weights[ij] = self.g(self.weights[ij] - input[ij] * theta(self_out, sigma) * theta(sigma, him_out))

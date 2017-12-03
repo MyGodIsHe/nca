@@ -3,19 +3,32 @@
 from functools import reduce
 from operator import mul
 import sys
+from optparse import OptionParser
 
 from tpm import TPM, distance
 
 
-if __name__ == '__main__':
-    K = 3
-    N = 3
-    L = 3
-    a = TPM(K=K, N=N, L=L)
-    a.randomize_weights()
-    b = TPM(K=K, N=N, L=L)
-    b.randomize_weights()
+def main(K, N, L, seed, learning_rule):
+    a = TPM(K=K, N=N, L=L, learning_rule=learning_rule)
+    b = TPM(K=K, N=N, L=L, learning_rule=learning_rule)
+    if seed:
+        try:
+            offset = len(seed)//2
+            a.load_from_string(seed[:offset])
+            b.load_from_string(seed[offset:])
+        except Exception as e:
+            raise e
+            print("Bad seed")
+            return
+    else:
+        a.randomize_weights()
+        b.randomize_weights()
 
+    print('seed: {}{}'.format(a, b))
+    print('rule:', a.learning_rule.__name__[14:])
+    print('K:', K)
+    print('N:', N)
+    print('L:', L)
     print("start distance: ", distance(a, b))
     i = 1
 
@@ -35,3 +48,20 @@ if __name__ == '__main__':
         sys.stdout.write("\rcycles: %010.i; distance: %010.i;" % (i, distance(a, b)))
         sys.stdout.flush()
         i += 1
+
+    if i > 1:
+        print()
+    print("complete")
+
+
+if __name__ == '__main__':
+    parser = OptionParser()
+    parser.add_option("-K", "--K", dest="K", type="int", default=3)
+    parser.add_option("-N", "--N", dest="N", type="int", default=3)
+    parser.add_option("-L", "--L", dest="L", type="int", default=3)
+    parser.add_option("-s", "--seed", dest="seed")
+    parser.add_option("-r", "--rule", dest="rule")
+
+    options, args = parser.parse_args()
+
+    main(options.K, options.N, options.L, options.seed, options.rule)
