@@ -2,6 +2,8 @@
 
 The most used protocol for key exchange between two parties A and B in the practice is Diffie-Hellman protocol. Neural key exchange, which is based on the synchronization of two tree parity machines, should be a secure replacement for this method. Synchronizing these two machines is similar to synchronizing two chaotic oscillators in chaos communications.
 
+Python 3 support
+
 ## Usage
 ```
 nca.py [options]

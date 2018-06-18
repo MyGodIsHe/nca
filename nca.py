@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 from optparse import OptionParser
 
-from tpm import TPM, distance, convert_to_hex
+from tpm import TPM, distance
 
 
 LEARNING_RULES = {
