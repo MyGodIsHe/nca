@@ -1,8 +1,8 @@
+[![Python 3 Support](https://img.shields.io/badge/python-3.4%2C%203.5%2C%203.6-blue.svg)](https://shields.io/)
+
 # Neural Cryptographic Algorithm
 
 The most used protocol for key exchange between two parties A and B in the practice is Diffie-Hellman protocol. Neural key exchange, which is based on the synchronization of two tree parity machines, should be a secure replacement for this method. Synchronizing these two machines is similar to synchronizing two chaotic oscillators in chaos communications.
-
-Python 3 support
 
 ## Usage
 ```
